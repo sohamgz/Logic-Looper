@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/routes/auth.routes.ts","./src/routes/leaderboard.routes.ts","./src/routes/score.routes.ts","./src/services/truecaller.ts"],"version":"5.9.3"}

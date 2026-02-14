@@ -10,6 +10,7 @@ export default defineConfig({
       include: /src\/.*\.(js|ts|jsx|tsx)$/,
     }),
   ],
+
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
@@ -21,11 +22,26 @@ export default defineConfig({
       '@types': resolve(__dirname, './src/types'),
     },
   },
+
   optimizeDeps: {
     esbuildOptions: {
       loader: {
-        '.js': 'jsx', // ⚠ Treat all JS files as JSX
-        '.ts': 'ts',  // Leave TypeScript as ts
+        '.js': 'jsx', // Treat JS files as JSX
+        '.ts': 'ts',
+      },
+    },
+  },
+
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'router': ['react-router-dom'],
+          'redux': ['@reduxjs/toolkit', 'react-redux'],
+          'firebase': ['firebase/app', 'firebase/auth'],
+          'animation': ['framer-motion'],
+        },
       },
     },
   },

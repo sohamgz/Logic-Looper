@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://logic-looper-one.vercel.app/sitemap.xml

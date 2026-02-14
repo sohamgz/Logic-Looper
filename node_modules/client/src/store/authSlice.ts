@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { User, AuthState } from '@types/auth.types';
+import { User, AuthState } from '@app-types/auth.types';
 import { signInWithGoogle, logout as firebaseLogout } from '@/services/firebase';
 import { loginWithTruecaller } from '@/services/truecaller';
 

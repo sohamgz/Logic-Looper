@@ -1,3 +1,4 @@
+import { updateStreak } from './streakSlice';
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Puzzle, GameState } from '../types/puzzle.types';
 import { getTodaysPuzzle } from '@utils/puzzleGenerator';
@@ -5,7 +6,7 @@ import { validatePuzzle, calculateScore } from '@utils/puzzleValidators';
 import { saveProgress, getProgress } from '@/services/storage';
 import dayjs from 'dayjs';
 
-interface PuzzleState {
+export interface PuzzleState {
   currentPuzzle: Puzzle | null;
   gameState: GameState | null;
   isLoading: boolean;
@@ -53,7 +54,7 @@ export const loadTodaysPuzzle = createAsyncThunk(
 // Submit answer
 export const submitAnswer = createAsyncThunk(
   'puzzle/submitAnswer',
-  async (userAnswer: any, { getState, rejectWithValue }) => {
+  async (userAnswer: any, { getState,dispatch, rejectWithValue }) => {
     try {
       const state = getState() as { puzzle: PuzzleState };
       const { currentPuzzle, gameState } = state.puzzle;
@@ -80,6 +81,8 @@ export const submitAnswer = createAsyncThunk(
           completed: true,
           lastUpdated: new Date().toISOString(),
         });
+
+        dispatch(updateStreak(currentPuzzle.date));
 
         return { isCorrect: true, score, timeTaken };
       }

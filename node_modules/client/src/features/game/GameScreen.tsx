@@ -9,9 +9,11 @@ import { BinaryPuzzle } from '@components/game/BinaryPuzzle';
 import { SequencePuzzle } from '@components/game/SequencePuzzle';
 import { DeductionPuzzle } from '@components/game/DeductionPuzzle';
 
+
 export const GameScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { currentPuzzle, gameState, isLoading } = useSelector((state: RootState) => state.puzzle);
+  const { currentStreak } = useSelector((state: RootState) => state.streak);
   const [timer, setTimer] = useState(0);
 
   useEffect(() => {
@@ -31,10 +33,10 @@ export const GameScreen = () => {
     const result = await dispatch(submitAnswer(answer));
     if (submitAnswer.fulfilled.match(result) && result.payload.isCorrect) {
       // Answer is correct - Redux will update gameState.isComplete
-      console.log('✅ Correct answer!');
+      console.log('Correct answer!');
     } else {
       // Wrong answer
-      alert('❌ Incorrect! Try again.');
+      alert('Incorrect! Try again.');
     }
   };
 
@@ -65,36 +67,50 @@ export const GameScreen = () => {
     );
   }
 
-  if (gameState.isComplete) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="card text-center max-w-md"
-        >
-          <div className="text-6xl mb-4">🎉</div>
-          <h2 className="text-3xl font-bold text-green-700 mb-2">Puzzle Complete!</h2>
-          <p className="text-gray-600 mb-4">Great job solving today's puzzle!</p>
-          <div className="space-y-2 text-left bg-gray-50 p-4 rounded-lg">
-            <div className="flex justify-between">
-              <span className="font-semibold">Score:</span>
-              <span className="text-primary-600 font-bold">{gameState.score} points</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-semibold">Time:</span>
-              <span>{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-semibold">Hints Used:</span>
-              <span>{gameState.hintsUsed}</span>
-            </div>
+if (gameState.isComplete) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="card text-center max-w-md"
+      >
+        <div className="text-6xl mb-4">Congrates</div>
+        <h2 className="text-3xl font-bold text-green-700 mb-2">Puzzle Complete!</h2>
+        <p className="text-gray-600 mb-4">Great job solving today's puzzle!</p>
+        
+        {/* Stats */}
+        <div className="space-y-2 text-left bg-gray-50 p-4 rounded-lg">
+          <div className="flex justify-between">
+            <span className="font-semibold">Score:</span>
+            <span className="text-primary-600 font-bold">{gameState.score} points</span>
           </div>
-          <p className="text-sm text-gray-500 mt-4">Come back tomorrow for a new puzzle!</p>
-        </motion.div>
-      </div>
-    );
-  }
+          <div className="flex justify-between">
+            <span className="font-semibold">Time:</span>
+            <span>{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-semibold">Hints Used:</span>
+            <span>{gameState.hintsUsed}</span>
+          </div>
+        </div>
+
+        {/* Streak Info */}
+        <div className="mt-4 bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
+          <div className="text-4xl mb-2">🔥</div>
+          <div className="text-2xl font-bold text-orange-700">
+            {currentStreak} Day Streak!
+          </div>
+          <p className="text-sm text-orange-600 mt-1">
+            Keep playing daily to maintain your streak
+          </p>
+        </div>
+
+        <p className="text-sm text-gray-500 mt-4">Come back tomorrow for a new puzzle!</p>
+      </motion.div>
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">

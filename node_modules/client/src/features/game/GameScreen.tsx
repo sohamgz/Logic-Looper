@@ -9,7 +9,6 @@ import { BinaryPuzzle } from '@components/game/BinaryPuzzle';
 import { SequencePuzzle } from '@components/game/SequencePuzzle';
 import { DeductionPuzzle } from '@components/game/DeductionPuzzle';
 
-
 export const GameScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { currentPuzzle, gameState, isLoading } = useSelector((state: RootState) => state.puzzle);
@@ -19,7 +18,7 @@ export const GameScreen = () => {
   useEffect(() => {
     dispatch(loadTodaysPuzzle());
   }, [dispatch]);
-  
+
   useEffect(() => {
     if (gameState && !gameState.isComplete) {
       const interval = setInterval(() => {
@@ -32,10 +31,8 @@ export const GameScreen = () => {
   const handleSubmit = async (answer: any) => {
     const result = await dispatch(submitAnswer(answer));
     if (submitAnswer.fulfilled.match(result) && result.payload.isCorrect) {
-      // Answer is correct - Redux will update gameState.isComplete
       console.log('Correct answer!');
     } else {
-      // Wrong answer
       alert('Incorrect! Try again.');
     }
   };
@@ -45,82 +42,91 @@ export const GameScreen = () => {
     alert('Hint: Check the rules carefully!');
   };
 
+  /* ================= LOADING STATE ================= */
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading today's puzzle...</p>
         </div>
-      </div>
+      </main>
     );
   }
 
+  /* ================= ERROR STATE ================= */
   if (!currentPuzzle || !gameState) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-xl text-gray-600">No puzzle available</p>
           <p className="text-sm text-gray-500 mt-2">Check console for errors</p>
         </div>
-      </div>
+      </main>
     );
   }
 
-if (gameState.isComplete) {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="card text-center max-w-md"
-      >
-        <div className="text-6xl mb-4">Congrates</div>
-        <h2 className="text-3xl font-bold text-green-700 mb-2">Puzzle Complete!</h2>
-        <p className="text-gray-600 mb-4">Great job solving today's puzzle!</p>
-        
-        {/* Stats */}
-        <div className="space-y-2 text-left bg-gray-50 p-4 rounded-lg">
-          <div className="flex justify-between">
-            <span className="font-semibold">Score:</span>
-            <span className="text-primary-600 font-bold">{gameState.score} points</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Time:</span>
-            <span>{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-semibold">Hints Used:</span>
-            <span>{gameState.hintsUsed}</span>
-          </div>
-        </div>
+  /* ================= COMPLETED STATE ================= */
+  if (gameState.isComplete) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="card text-center max-w-md"
+        >
+          <div className="text-6xl mb-4">🎉</div>
+          <h2 className="text-3xl font-bold text-green-700 mb-2">Puzzle Complete!</h2>
+          <p className="text-gray-600 mb-4">Great job solving today's puzzle!</p>
 
-        {/* Streak Info */}
-        <div className="mt-4 bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
-          <div className="text-4xl mb-2">🔥</div>
-          <div className="text-2xl font-bold text-orange-700">
-            {currentStreak} Day Streak!
+          <div className="space-y-2 text-left bg-gray-50 p-4 rounded-lg">
+            <div className="flex justify-between">
+              <span className="font-semibold">Score:</span>
+              <span className="text-primary-600 font-bold">{gameState.score} points</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-semibold">Time:</span>
+              <span>{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-semibold">Hints Used:</span>
+              <span>{gameState.hintsUsed}</span>
+            </div>
           </div>
-          <p className="text-sm text-orange-600 mt-1">
-            Keep playing daily to maintain your streak
+
+          <div className="mt-4 bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
+            <div className="text-4xl mb-2">🔥</div>
+            <div className="text-2xl font-bold text-orange-700">
+              {currentStreak} Day Streak!
+            </div>
+            <p className="text-sm text-orange-600 mt-1">
+              Keep playing daily to maintain your streak
+            </p>
+          </div>
+
+          <p className="text-sm text-gray-500 mt-4">
+            Come back tomorrow for a new puzzle!
           </p>
-        </div>
+        </motion.div>
+      </main>
+    );
+  }
 
-        <p className="text-sm text-gray-500 mt-4">Come back tomorrow for a new puzzle!</p>
-      </motion.div>
-    </div>
-  );
-}
-
+  /* ================= ACTIVE GAME STATE ================= */
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <main className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
+
         {/* Header */}
         <div className="card mb-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-primary-700">{currentPuzzle.title}</h1>
-              <p className="text-gray-600 text-sm">{currentPuzzle.description}</p>
+              <h1 className="text-2xl font-bold text-primary-700">
+                {currentPuzzle.title}
+              </h1>
+              <p className="text-gray-600 text-sm">
+                {currentPuzzle.description}
+              </p>
             </div>
             <div className="text-right">
               <div className="text-3xl font-bold text-primary-600">
@@ -186,7 +192,8 @@ if (gameState.isComplete) {
             💡 Use Hint ({currentPuzzle.maxHints - gameState.hintsUsed} left)
           </button>
         </div>
+
       </div>
-    </div>
+    </main>
   );
 };

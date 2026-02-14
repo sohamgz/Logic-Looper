@@ -11,7 +11,11 @@ export const SequencePuzzle = ({ numbers, solution, onSubmit }: Props) => {
   const [userAnswer, setUserAnswer] = useState<string>('');
 
   const handleSubmit = () => {
-    const answer = userAnswer.split(',').map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
+    const answer = userAnswer
+      .split(',')
+      .map(n => parseFloat(n.trim()))
+      .filter(n => !isNaN(n));
+
     onSubmit(answer);
   };
 
@@ -38,14 +42,21 @@ export const SequencePuzzle = ({ numbers, solution, onSubmit }: Props) => {
 
       {/* Input */}
       <div className="max-w-md mx-auto">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label
+          htmlFor="sequence-answer"
+          className="block text-sm font-semibold text-gray-700 mb-2"
+        >
           Enter the missing number(s) (comma-separated if multiple):
         </label>
+
         <input
+          id="sequence-answer"
+          name="sequenceAnswer"
           type="text"
           value={userAnswer}
           onChange={(e) => setUserAnswer(e.target.value)}
           placeholder="e.g., 8 or 8, 16"
+          autoComplete="off"
           className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg"
         />
       </div>

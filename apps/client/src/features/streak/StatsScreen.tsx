@@ -1,3 +1,4 @@
+import { ShareStreak } from '@components/streak/ShareStreak';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { RootState } from '@store/index';
@@ -12,6 +13,7 @@ export const StatsScreen = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
+        
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -27,7 +29,9 @@ export const StatsScreen = () => {
               />
             )}
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{user?.name}</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {user?.name}
+              </h1>
               <p className="text-gray-600">{user?.email}</p>
             </div>
           </div>
@@ -44,8 +48,12 @@ export const StatsScreen = () => {
             <div className="text-5xl font-bold text-primary-600 mb-2">
               {currentStreak}
             </div>
-            <div className="text-gray-600 font-semibold">Current Streak</div>
-            <div className="text-sm text-gray-500 mt-1">days in a row</div>
+            <div className="text-gray-600 font-semibold">
+              Current Streak
+            </div>
+            <div className="text-sm text-gray-500 mt-1">
+              days in a row
+            </div>
           </motion.div>
 
           <motion.div
@@ -57,8 +65,12 @@ export const StatsScreen = () => {
             <div className="text-5xl font-bold text-green-600 mb-2">
               {longestStreak}
             </div>
-            <div className="text-gray-600 font-semibold">Longest Streak</div>
-            <div className="text-sm text-gray-500 mt-1">personal best</div>
+            <div className="text-gray-600 font-semibold">
+              Longest Streak
+            </div>
+            <div className="text-sm text-gray-500 mt-1">
+              personal best
+            </div>
           </motion.div>
 
           <motion.div
@@ -70,8 +82,12 @@ export const StatsScreen = () => {
             <div className="text-5xl font-bold text-blue-600 mb-2">
               {playedDates.length}
             </div>
-            <div className="text-gray-600 font-semibold">Total Puzzles</div>
-            <div className="text-sm text-gray-500 mt-1">all time</div>
+            <div className="text-gray-600 font-semibold">
+              Total Puzzles
+            </div>
+            <div className="text-sm text-gray-500 mt-1">
+              all time
+            </div>
           </motion.div>
         </div>
 
@@ -87,6 +103,22 @@ export const StatsScreen = () => {
           </h2>
           <Heatmap playedDates={playedDates} />
         </motion.div>
+
+        {/* Share Streak */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-6"
+        >
+          <ShareStreak
+            currentStreak={currentStreak}
+            longestStreak={longestStreak}
+            totalPuzzles={playedDates.length}
+            userName={user?.name || 'User'}
+          />
+        </motion.div>
+
       </div>
     </div>
   );

@@ -1,11 +1,18 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { validateScoreSubmission, validateDateFormat } from '../middleware/validation';
+
 
 const router = Router();
 const prisma = new PrismaClient();
 
 // Submit daily score (batched)
-router.post('/submit', async (req, res) => {
+router.post(
+  '/submit',
+  validateDateFormat,
+  validateScoreSubmission,
+  async (req, res) => {
+
   try {
     const { userId, scores } = req.body;
 

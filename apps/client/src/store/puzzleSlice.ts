@@ -1,3 +1,4 @@
+import { generatePuzzleSignature } from '@logic-looper/shared';
 import { updateStreak } from './streakSlice';
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Puzzle, GameState } from '../types/puzzle.types';
@@ -54,7 +55,7 @@ export const loadTodaysPuzzle = createAsyncThunk(
 // Submit answer
 export const submitAnswer = createAsyncThunk(
   'puzzle/submitAnswer',
-  async (userAnswer: any, { getState,dispatch, rejectWithValue }) => {
+  async (userAnswer: any, { getState, dispatch, rejectWithValue }) => {
     try {
       const state = getState() as { puzzle: PuzzleState };
       const { currentPuzzle, gameState } = state.puzzle;

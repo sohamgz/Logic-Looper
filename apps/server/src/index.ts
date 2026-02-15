@@ -6,6 +6,7 @@ import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth.routes';
 import scoreRoutes from './routes/score.routes';
 import leaderboardRoutes from './routes/leaderboard.routes';
+import syncRoutes from './routes/sync.routes';
 
 
 
@@ -15,9 +16,10 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
+app.use('/api/sync', syncRoutes); 
 app.use(helmet());
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'https://logic-looper-one.vercel.app'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

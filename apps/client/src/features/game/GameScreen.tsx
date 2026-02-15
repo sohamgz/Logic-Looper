@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
+import dayjs from 'dayjs';
 import { AppDispatch, RootState } from '@store/index';
 import { loadTodaysPuzzle, submitAnswer, useHint } from '@store/puzzleSlice';
 import { MatrixPuzzle } from '@components/game/MatrixPuzzle';
@@ -8,12 +9,15 @@ import { PatternPuzzle } from '@components/game/PatternPuzzle';
 import { BinaryPuzzle } from '@components/game/BinaryPuzzle';
 import { SequencePuzzle } from '@components/game/SequencePuzzle';
 import { DeductionPuzzle } from '@components/game/DeductionPuzzle';
+import { syncManager } from '@/services/syncManager';
 
 export const GameScreen = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { currentPuzzle, gameState, isLoading } = useSelector((state: RootState) => state.puzzle);
   const { currentStreak } = useSelector((state: RootState) => state.streak);
+  const { user } = useSelector((state: RootState) => state.auth);
   const [timer, setTimer] = useState(0);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     dispatch(loadTodaysPuzzle());
@@ -30,10 +34,44 @@ export const GameScreen = () => {
 
   const handleSubmit = async (answer: any) => {
     const result = await dispatch(submitAnswer(answer));
+    
     if (submitAnswer.fulfilled.match(result) && result.payload.isCorrect) {
       console.log('Correct answer!');
+      
+      // Save to sync queue
+      await savePuzzleCompletion(answer);
     } else {
       alert('Incorrect! Try again.');
+    }
+  };
+
+  const savePuzzleCompletion = async (userAnswer: any) => {
+    if (!currentPuzzle || !gameState) return;
+    
+    const scoreData = {
+      date: dayjs().format('YYYY-MM-DD'),
+      score: gameState.score,
+      timeTaken: timer,
+      difficulty: currentPuzzle.difficulty || 'medium',
+      puzzleType: currentPuzzle.type,
+      userAnswer: userAnswer,
+      hintsUsed: gameState.hintsUsed
+    };
+    
+    // Add to IndexedDB sync queue
+    await syncManager.addPendingSync(scoreData);
+    
+    // Try immediate sync if user is logged in and online
+    if (user && navigator.onLine) {
+      setIsSyncing(true);
+      const authToken = user.token || localStorage.getItem('authToken'); // Adjust based on your auth setup
+      
+      if (authToken) {
+        const result = await syncManager.syncToServer(authToken);
+        console.log('Sync result:', result);
+      }
+      
+      setIsSyncing(false);
     }
   };
 
@@ -103,6 +141,24 @@ export const GameScreen = () => {
               Keep playing daily to maintain your streak
             </p>
           </div>
+
+          {/* Sync Status */}
+          {isSyncing && (
+            <div className="mt-4 flex items-center justify-center gap-2 text-sm text-blue-600">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <span>Syncing your progress...</span>
+            </div>
+          )}
+
+          {!user && (
+            <div className="mt-4 bg-yellow-50 border border-yellow-300 rounded-lg p-3">
+              <p className="text-sm text-yellow-700">
+                💾 Playing as guest. Your progress is saved locally.
+                <br />
+                <span className="text-xs">Sign in to sync across devices!</span>
+              </p>
+            </div>
+          )}
 
           <p className="text-sm text-gray-500 mt-4">
             Come back tomorrow for a new puzzle!

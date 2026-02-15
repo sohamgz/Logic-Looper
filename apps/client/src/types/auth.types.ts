@@ -5,6 +5,7 @@ export interface User {
   avatar?: string;
   provider: 'google' | 'truecaller' | 'guest';
   createdAt: string;
+  token?: string;
 }
 
 export interface AuthState {

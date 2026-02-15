@@ -11,6 +11,11 @@ export interface ScoreData {
   hintsUsed: number;
 }
 
+interface PendingSync extends ScoreData {
+  createdAt: string;
+  retryCount: number;
+}
+
 // Initialize IndexedDB store for pending syncs
 const pendingSyncStore = localforage.createInstance({
   name: 'LogicLooper',
@@ -21,7 +26,8 @@ const pendingSyncStore = localforage.createInstance({
 class SyncManager {
   private static instance: SyncManager;
   private syncInProgress = false;
-  private API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+  private API_BASE_URL =
+    import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
   private constructor() {}
 
@@ -38,11 +44,15 @@ class SyncManager {
   async addPendingSync(scoreData: ScoreData): Promise<void> {
     try {
       const id = `${scoreData.date}_${Date.now()}`;
-      await pendingSyncStore.setItem(id, {
+
+      const payload: PendingSync = {
         ...scoreData,
         createdAt: new Date().toISOString(),
         retryCount: 0,
-      });
+      };
+
+      await pendingSyncStore.setItem<PendingSync>(id, payload);
+
       console.log('Score added to sync queue:', id);
     } catch (error) {
       console.error('Error adding to sync queue:', error);
@@ -53,13 +63,15 @@ class SyncManager {
   /**
    * Get all pending syncs
    */
-  async getPendingSyncs(): Promise<Array<ScoreData & { createdAt: string; retryCount: number }>> {
+  async getPendingSyncs(): Promise<PendingSync[]> {
     try {
       const keys = await pendingSyncStore.keys();
-      const syncs = [];
+
+      const syncs: PendingSync[] = [];
 
       for (const key of keys) {
-        const item = await pendingSyncStore.getItem(key);
+        const item = await pendingSyncStore.getItem<PendingSync>(key);
+
         if (item) {
           syncs.push(item);
         }
@@ -75,7 +87,10 @@ class SyncManager {
   /**
    * Sync a single score to the server
    */
-  async syncScoreToServer(scoreData: ScoreData, authToken: string): Promise<boolean> {
+  async syncScoreToServer(
+    scoreData: ScoreData,
+    authToken: string
+  ): Promise<boolean> {
     try {
       const response = await fetch(`${this.API_BASE_URL}/scores`, {
         method: 'POST',
@@ -101,7 +116,9 @@ class SyncManager {
   /**
    * Sync all pending scores to the server
    */
-  async syncToServer(authToken: string): Promise<{ success: number; failed: number }> {
+  async syncToServer(
+    authToken: string
+  ): Promise<{ success: number; failed: number }> {
     if (this.syncInProgress) {
       console.log('Sync already in progress');
       return { success: 0, failed: 0 };
@@ -121,18 +138,21 @@ class SyncManager {
       for (const sync of pendingSyncs) {
         const { createdAt, retryCount, ...scoreData } = sync;
 
-        const success = await this.syncScoreToServer(scoreData, authToken);
+        const success = await this.syncScoreToServer(
+          scoreData,
+          authToken
+        );
+
+        const key = `${scoreData.date}_${new Date(
+          createdAt
+        ).getTime()}`;
 
         if (success) {
-          // Remove from pending queue
-          const key = `${scoreData.date}_${new Date(createdAt).getTime()}`;
           await pendingSyncStore.removeItem(key);
           result.success++;
         } else {
-          // Increment retry count, but don't retry if already failed 3 times
           if (retryCount < 3) {
-            const key = `${scoreData.date}_${new Date(createdAt).getTime()}`;
-            await pendingSyncStore.setItem(key, {
+            await pendingSyncStore.setItem<PendingSync>(key, {
               ...sync,
               retryCount: retryCount + 1,
             });
@@ -141,7 +161,6 @@ class SyncManager {
         }
       }
 
-      // Mark as synced if all successful
       if (result.failed === 0) {
         await markScoresSynced();
       }
@@ -157,7 +176,7 @@ class SyncManager {
   }
 
   /**
-   * Clear all pending syncs (use with caution)
+   * Clear all pending syncs
    */
   async clearPendingSyncs(): Promise<void> {
     try {
@@ -170,7 +189,7 @@ class SyncManager {
   }
 
   /**
-   * Setup listener for online/offline events to auto-sync
+   * Auto-sync when connection is restored
    */
   setupAutoSync(authToken: string): void {
     window.addEventListener('online', async () => {

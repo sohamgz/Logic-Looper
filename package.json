@@ -9,7 +9,7 @@
     "dev:client": "npm run dev --workspace=client",
     "dev:server": "npm run dev --workspace=server",
     "dev:all": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
-    "build": "npm run build --workspace=@logic-looper/shared && npm run build --workspace=client",
+    "build": "npm run build --workspace=@logic-looper/shared && npm run build --workspace=server",
     "build:client": "npm run build --workspace=client",
     "build:server": "npm run build --workspace=server"
   },

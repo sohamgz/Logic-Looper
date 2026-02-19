@@ -121,7 +121,7 @@ async function updateUserStats(userId: string) {
     }
   }
 
-  const totalTime = userScores.reduce((sum, score) => sum + score.timeTaken, 0);
+  const totalTime = userScores.reduce((sum: number, score: any) => sum + score.timeTaken, 0);
   const avgSolveTime = userScores.length > 0 ? totalTime / userScores.length : 0;
 
   await prisma.userStats.upsert({

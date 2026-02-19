@@ -7,10 +7,10 @@
     "build": "tsc"
   },
   "dependencies": {
-    "crypto-js": "^4.2.0"
+    "crypto-js": "^4.2.0",
+    "@types/crypto-js": "^4.2.2"
   },
   "devDependencies": {
-    "@types/crypto-js": "^4.2.2",
     "typescript": "^5.9.3"
   }
 }
